@@ -102,6 +102,7 @@
 
 		glyphBounds.map(function(glyphBound){
 			glyphBound.padding = padding;
+			glyphBound.margin = margin;
 			glyphBound.bounds.x -= padding.left;
 			glyphBound.bounds.y -= padding.right;
 			glyphBound.bounds.width += padding.left + padding.right;
@@ -195,7 +196,28 @@
 		bounds.forEach(function(glyphBound){
 			var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
 			Object.assign(path, style);
-			path.draw(ctx);
+
+			if(typeof style.fill === "string"){
+				path.draw(ctx);
+			}else{
+				path.fill = null;
+				path.stroke = null;
+
+				var gradient;
+				if(style.fill.type === "linear"){
+					gradient = ctx.createLinearGradient(glyphBound.x + style.fill.x0, glyphBound.y + style.fill.y0, glyphBound.x + style.fill.x1, glyphBound.y + style.fill.y1);
+				}else if(style.fill.type === "radial"){
+					gradient = ctx.createRadialGradient(glyphBound.x + style.fill.x0, glyphBound.y + style.fill.y0, style.fill.r0, glyphBound.x + style.fill.x1, glyphBound.y + style.fill.y1, style.fill.r1 );
+				}
+
+				style.fill.colors.forEach(function(color){
+					gradient.addColorStop.apply(gradient, color);
+				});
+				ctx.fillStyle = gradient;
+
+				path.draw(ctx);
+				ctx.fill();
+			}
 		});
 		return canvas;
 	}
@@ -248,7 +270,6 @@
 			.alias("o", "out")
 			.alias("f", "fill")
 			.default({
-				fill: "black",
 				out: "font",
 				name: "font",
 				size : 72,
@@ -272,8 +293,8 @@
 		if(argv.style){
 			var css = fs.readFileSync(argv.style, "utf8");
 			Object.assign(style, JSON.parse(css));
-			style.fill = argv.fill ? argv.fill : style.fill;
 		}
+		style.fill = argv.fill ? argv.fill : style.fill;
 
 		process(argv, style);
 	}

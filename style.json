@@ -1,15 +1,41 @@
 {
-	"fill": "#ff0000",
+	"--fill": "#ff0000",
+	"-fill": {
+		"type": "linear",
+		"x0": 0,
+	   	"y0": 0,
+	   	"x1": 48,
+	   	"y1": 48,
+		"colors":[
+			[0.0, "red"],
+			[0.5, "green"],
+			[1.0, "blue"]
+		]
+	},
+	"fill": {
+		"type": "radial",
+		"x0": 24,
+	   	"y0": 24,
+	   	"x1": 24,
+	   	"y1": 24,
+		"r0": 0,
+		"r1": 24,
+		"colors":[
+			[0.0, "red"],
+			[0.5, "green"],
+			[1.0, "blue"]
+		]
+	},
 	"stroke": "#00ff00",
-	"strokeWidth": 1,
+	"strokeWidth": 8,
 	"shadowColor": "#000000",
 	"shadowBlur": 3,
 	"shadowOffsetX": 2,
-	"shadowOffsetY": 2,
+	"shadowOffsetY": 4,
 	"padding": {
-		"top": 2,
-		"right": 5,
-		"bottom": 8,
-		"left": 2
+		"top": 4,
+		"right": 8,
+		"bottom": 14,
+		"left": 4
 	}
 }
