@@ -1,6 +1,6 @@
 #generate bitmap font from the ttf
 
-'''sh
+```sh
 Usage: index.js [--chars chars] [--size size] [--width width] [--height height]
 [--name face] [--fill color] [--style style] [--out out] path_to_font
 
@@ -18,4 +18,4 @@ Options:
 Examples:
   index.js --chars 'abc' --uppercase        generate bitmap font for abcABC and
   font.ttf                                  store it to font.png and font.fnt
-'''
+```
