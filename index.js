@@ -61,9 +61,7 @@
 		});
 	}
 
-
 	function getBounds(path){
-
 		var xs = path.commands
 			.filter(has("x"))
 			.map(prop("x"))
@@ -250,7 +248,7 @@
 			.default({
 				fill: "black",
 				out: "font",
-				face: "font",
+				name: "font",
 				size : 72,
 				width : 256,
 				height : 256,
@@ -272,6 +270,7 @@
 		if(argv.style){
 			var css = fs.readFileSync(argv.style, "utf8");
 			Object.assign(style, JSON.parse(css));
+			style.fill = argv.fill ? argv.fill : style.fill;
 		}
 
 		process(argv, style);
