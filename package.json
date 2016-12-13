@@ -1,0 +1,30 @@
+{
+  "name": "fontgen",
+  "version": "1.0.0",
+  "description": "generate bitmap font from a ttf",
+  "main": "index.js",
+  "dependencies": {
+    "canvas": "^1.6.2",
+    "opentype.js": "^0.6.6",
+    "yargs": "^6.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/pblazh/fontgen.git"
+  },
+  "keywords": [
+    "bitmap",
+    "font",
+    "ttf"
+  ],
+  "author": "Pavel Blazhyievskyi",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/pblazh/fontgen/issues"
+  },
+  "homepage": "https://github.com/pblazh/fontgen#readme"
+}

@@ -1,0 +1,15 @@
+{
+	"fill": "#ff0000",
+	"stroke": "#00ff00",
+	"strokeWidth": 1,
+	"shadowColor": "#000000",
+	"shadowBlur": 3,
+	"shadowOffsetX": 2,
+	"shadowOffsetY": 2,
+	"padding": {
+		"top": 2,
+		"right": 5,
+		"bottom": 8,
+		"left": 2
+	}
+}
