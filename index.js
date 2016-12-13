@@ -72,12 +72,14 @@
 			.map(prop("y"))
 			.sort(compareNumbers);
 
-		return {
-			x: xs[0],
-			y: ys[0],
-			width: xs[xs.length - 1] - xs[0],
-			height: ys[ys.length - 1] - ys[0]
-		};
+		return xs.length && ys.length
+			? {
+				x: xs[0],
+				y: ys[0],
+				width: xs[xs.length - 1] - xs[0],
+				height: ys[ys.length - 1] - ys[0]
+			}
+			: {x: 0, y:0, width:0, height:0};
 	}
 
 	function getGlyphBounds(glyphs, size){
@@ -129,7 +131,7 @@
 		var data = bounds.map(function(glyphBound){
 			return {
 				//id: glyphBound.glyph.index,
-				id: glyphBound.glyph.name.charCodeAt(0),
+				id: glyphBound.glyph.unicode,
 				letter: glyphBound.glyph.name,
 				x: Math.round(glyphBound.x),
 				y: Math.round(glyphBound.y),
