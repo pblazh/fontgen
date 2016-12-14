@@ -1,4 +1,6 @@
 (function fontgen(){
+	"use strict";
+
 	var process = require("process");
 	var fs = require("fs");
 
@@ -184,12 +186,17 @@
 		ctx.shadowOffsetX = config.shadowOffsetX;
 		ctx.shadowOffsetY = config.shadowOffsetY;
 
-
-		bounds.forEach(function(glyphBound){
-			var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
-			Object.assign(path, config);
-			path.draw(ctx);
-		});
+		if(config.shadowColor){
+			bounds.forEach(function(glyphBound){
+				var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
+				Object.assign(path, config);
+				path.stroke = null;
+				ctx.lineWidth = 0;
+				ctx.lineStyle = null;
+				path.fill = config.shadowColor;
+				path.draw(ctx);
+			});
+		}
 
 		ctx.shadowColor = null;
 		ctx.shadowBlur = null;
@@ -199,13 +206,12 @@
 		bounds.forEach(function(glyphBound){
 			var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
 			Object.assign(path, config);
+			path.fill = null;
+			path.stroke = null;
 
 			if(typeof config.fill === "string"){
-				path.draw(ctx);
+				applyStyle(ctx, config);
 			}else{
-				path.fill = null;
-				path.stroke = null;
-
 				var gradient;
 				if(config.fill.type === "linear"){
 					gradient = ctx.createLinearGradient(
@@ -228,13 +234,31 @@
 				config.fill.colors.forEach(function(color){
 					gradient.addColorStop.apply(gradient, color);
 				});
-				ctx.fillStyle = gradient;
 
-				path.draw(ctx);
+				ctx.fillStyle = gradient;
+			}
+
+			applyStyle(ctx, config);
+			path.draw(ctx);
+			if(config.fill){
 				ctx.fill();
 			}
+			if(config.lineStyle){
+				ctx.stroke();
+			}
 		});
+
 		return canvas;
+	}
+
+	function applyStyle(ctx, style){
+		["lineStyle", "lineWidth", "lineCap", "lineJoin"].forEach(function(property){
+			ctx[property] = style[property] ? style[property] : null;
+		});
+
+		if(style.lineDash){
+			ctx.setLineDash(style.lineDash);
+		}
 	}
 
 	function getFontdata(path, chars){
@@ -306,14 +330,20 @@
 	function main(){
 		var GLYPHS = " $лвRCHF¥Kčkr€£nt₪₹Lzłleiบาท₤₺,.-1234567890+:∞%abcdfghjmopqsuvwxyABDEGIJMNOPQSTUVWXYZ!№;?*()_=/|'@#^&{}[]\" ";
 		var config = {
+			glyphs : GLYPHS,
 			out: "font",
 			name: "font",
 			size : 72,
 			width : 256,
 			height : 256,
 			uppercase : false,
-			glyphs : GLYPHS,
+			lineStyle: null,
 			fill: "black",
+			lineCap: "round",
+			lineJoin: "round",
+			letterSpacing: 0,
+			lineSpacing: 0,
+			lineDash: null,
 			padding : {
 				top: 0,
 				right: 0,
@@ -323,9 +353,9 @@
 		};
 
 		var argv = require("yargs")
-			.usage("Usage: $0 [--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out out] [path_to_font]")
-			.example("$0 --glyphs 'abc' --uppercase font.ttf", "generate bitmap font for abcABC and store it to the font.png and font.fnt")
-			.boolean("uppercase")
+			.usage("Usage: $0 [--dump ][--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out out] [path_to_font]")
+			.example("$0 --glyphs 'abc' font.ttf", "generate bitmap font for abc and store it to the font.png and font.fnt")
+			.boolean("dump")
 			.help('h')
 			.alias('h', 'help')
 			.alias("W", "width")
@@ -333,7 +363,6 @@
 			.alias("s", "size")
 			.alias("g", "glyphs")
 			.alias("c", "config")
-			.alias("u", "uppercase")
 			.alias("n", "name")
 			.alias("o", "out")
 			.alias("f", "fill")
@@ -347,12 +376,18 @@
 				glyphs : GLYPHS
 			}).argv;
 
+
 		Object.assign(config, argv);
 		Object.assign(config, parseConfig(config.config));
-		Object.assign(config, argv);
+		//Object.assign(config, argv);
 
 		if(argv._.length){
 			config.font = argv._[0];
+		}
+
+		if(argv.dump){
+			console.log(JSON.stringify(config));
+			process.exit(0);
 		}
 
 		generate(config);

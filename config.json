@@ -1,10 +1,15 @@
 {
+	"comments":{
+		"fill": "gradients use normalised coordinats from 0 to 1",
+		"lineCap": "could be round, butt or square",
+		"lineJoin": "could be round, bevel or mitter"
+	},
+	"size": 128,
 	"glyphs": "abcdefg",
 	"font": "Roboto-Bold.ttf",
 	"name": "font",
 	"-fill": "#ff0000",
 	"--fill": {
-		"comment": "gradients use normalised coordinats from 0 to 1",
 		"type": "linear",
 		"x0": 0,
 	   	"y0": 0,
@@ -30,8 +35,14 @@
 			[1.0, "blue"]
 		]
 	},
-	"stroke": "#00ff00",
-	"strokeWidth": 8,
+	"lineStyle": "#00ff00",
+	"lineWidth": 5,
+
+	"lineCap": "round",
+	"lineJoin": "round",
+	"lineDash": [20, 8, 1, 8 ],
+
+
 	"shadowColor": "#000000",
 	"shadowBlur": 3,
 	"shadowOffsetX": 2,
