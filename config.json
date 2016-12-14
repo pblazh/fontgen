@@ -2,13 +2,14 @@
 	"glyphs": "abcdefg",
 	"font": "Roboto-Bold.ttf",
 	"name": "font",
-	"--fill": "#ff0000",
-	"-fill": {
+	"-fill": "#ff0000",
+	"--fill": {
+		"comment": "gradients use normalised coordinats from 0 to 1",
 		"type": "linear",
 		"x0": 0,
 	   	"y0": 0,
-	   	"x1": 48,
-	   	"y1": 48,
+	   	"x1": 1,
+	   	"y1": 1,
 		"colors":[
 			[0.0, "red"],
 			[0.5, "green"],
@@ -17,12 +18,12 @@
 	},
 	"fill": {
 		"type": "radial",
-		"x0": 24,
-	   	"y0": 24,
-	   	"x1": 24,
-	   	"y1": 24,
+		"x0": 0.5,
+	   	"y0": 0.5,
+	   	"x1": 0.5,
+	   	"y1": 0.5,
 		"r0": 0,
-		"r1": 24,
+		"r1": 1,
 		"colors":[
 			[0.0, "red"],
 			[0.5, "green"],

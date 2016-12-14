@@ -208,9 +208,21 @@
 
 				var gradient;
 				if(config.fill.type === "linear"){
-					gradient = ctx.createLinearGradient(glyphBound.x + config.fill.x0, glyphBound.y + config.fill.y0, glyphBound.x + config.fill.x1, glyphBound.y + config.fill.y1);
+					gradient = ctx.createLinearGradient(
+						glyphBound.x + config.fill.x0 * glyphBound.bounds.width,
+					   	glyphBound.y + config.fill.y0 * glyphBound.bounds.height,
+					   	glyphBound.x + config.fill.x1 * glyphBound.bounds.width,
+					   	glyphBound.y + config.fill.y1 * glyphBound.bounds.height
+					);
 				}else if(config.fill.type === "radial"){
-					gradient = ctx.createRadialGradient(glyphBound.x + config.fill.x0, glyphBound.y + config.fill.y0, config.fill.r0, glyphBound.x + config.fill.x1, glyphBound.y + config.fill.y1, config.fill.r1 );
+					gradient = ctx.createRadialGradient(
+						glyphBound.x + config.fill.x0 * glyphBound.bounds.width,
+					   	glyphBound.y + config.fill.y0 * glyphBound.bounds.height,
+					   	config.fill.r0 * glyphBound.bounds.height,
+						glyphBound.x + config.fill.x1 * glyphBound.bounds.width,
+						glyphBound.y + config.fill.y1 * glyphBound.bounds.height,
+						config.fill.r1 * glyphBound.bounds.height
+				   	);
 				}
 
 				config.fill.colors.forEach(function(color){
