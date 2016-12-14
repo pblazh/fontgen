@@ -46,14 +46,11 @@
 			[1.0, "yellow"]
 		]
 	},
-
+	"pattern": "pattern.png",
 	"lineWidth": 5,
-
 	"lineCap": "round",
 	"lineJoin": "round",
 	"lineDash": [20, 8, 1, 8 ],
-
-
 	"shadowColor": "#000000",
 	"shadowBlur": 3,
 	"shadowOffsetX": 2,

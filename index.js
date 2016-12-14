@@ -252,6 +252,7 @@
 					ctx.strokeStyle = config.strokeStyle;
 				}else{
 					ctx.strokeStyle = createGradient(ctx, config.strokeStyle, glyphBound.bounds, glyphBound.x, glyphBound.y);
+					console.log( ctx.strokeStyle);
 				}
 				ctx.lineWidth = config.lineWidth;
 				ctx.stroke();
@@ -348,12 +349,15 @@
 			height : 256,
 			uppercase : false,
 			lineStyle: null,
+			lineWidth: null,
 			fill: "black",
 			lineCap: "round",
 			lineJoin: "round",
 			letterSpacing: 0,
 			lineSpacing: 0,
 			lineDash: null,
+			pattern: null,
+			strokeStyle: null,
 			padding : {
 				top: 0,
 				right: 0,
