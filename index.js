@@ -135,7 +135,6 @@
 	function describeBounds(width, height, fontData, config, bounds){
 		var data = bounds.map(function(glyphBound){
 			return {
-				//id: glyphBound.glyph.index,
 				id: glyphBound.glyph.unicode,
 				letter: glyphBound.glyph.name,
 				x: Math.round(glyphBound.x),
@@ -160,10 +159,10 @@
 			"          italic='" + (fontData.italic ? "1" : "0") + "' ",
 			"          padding='" + config.padding.top + "," + config.padding.right + "," + config.padding.bottom + "," + config.padding.left + "' ",
 			"          charset='' unicode='' stretchH='100' smooth='1' aa='1' spacing='0,0' outline='0'/>",
-			"    <common lineHeight='95' ",
-			"            base='" + baseLine + "' ",
+			"    <common base='" + baseLine + "' ",
 			"            scaleW='" + width + "' ",
 			"            scaleH='" + height + "' ",
+			"            lineHeight='" + (config.size + config.lineSpacing) + "' ",
 			"            pages='1' packed='0'/>",
 			"    <pages>",
 			"        <page id='0' file='font.png'/>",

@@ -35,8 +35,8 @@
 	"shadowBlur": 3,
 	"shadowOffsetX": 2,
 	"shadowOffsetY": 4,
-	"letterSpacing": 5,
-	"lineSpacing": 5,
+	"letterSpacing": 15,
+	"lineSpacing": 15,
 	"padding": {
 		"top": 4,
 		"right": 8,
