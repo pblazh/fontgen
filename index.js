@@ -176,6 +176,33 @@
 		].join("\n");
 	}
 
+	function createGradient(ctx, config, bounds, x, y){
+		var gradient;
+		if(config.type === "linear"){
+			gradient = ctx.createLinearGradient(
+				x + config.x0 * bounds.width,
+				y + config.y0 * bounds.height,
+				x + config.x1 * bounds.width,
+				y + config.y1 * bounds.height
+			);
+		}else if(config.type === "radial"){
+			gradient = ctx.createRadialGradient(
+				x + config.x0 * bounds.width,
+				y + config.y0 * bounds.height,
+				config.r0 * bounds.height,
+				x + config.x1 * bounds.width,
+				y + config.y1 * bounds.height,
+				config.r1 * bounds.height
+			);
+		}
+
+		config.colors.forEach(function(color){
+			gradient.addColorStop.apply(gradient, color);
+		});
+
+		return gradient;
+	}
+
 	function drawGlyphs(width, height, bounds, config){
 		var Canvas = require("canvas")
 		, canvas = new Canvas(width, height)
@@ -212,30 +239,7 @@
 			if(typeof config.fill === "string"){
 				applyStyle(ctx, config);
 			}else{
-				var gradient;
-				if(config.fill.type === "linear"){
-					gradient = ctx.createLinearGradient(
-						glyphBound.x + config.fill.x0 * glyphBound.bounds.width,
-					   	glyphBound.y + config.fill.y0 * glyphBound.bounds.height,
-					   	glyphBound.x + config.fill.x1 * glyphBound.bounds.width,
-					   	glyphBound.y + config.fill.y1 * glyphBound.bounds.height
-					);
-				}else if(config.fill.type === "radial"){
-					gradient = ctx.createRadialGradient(
-						glyphBound.x + config.fill.x0 * glyphBound.bounds.width,
-					   	glyphBound.y + config.fill.y0 * glyphBound.bounds.height,
-					   	config.fill.r0 * glyphBound.bounds.height,
-						glyphBound.x + config.fill.x1 * glyphBound.bounds.width,
-						glyphBound.y + config.fill.y1 * glyphBound.bounds.height,
-						config.fill.r1 * glyphBound.bounds.height
-				   	);
-				}
-
-				config.fill.colors.forEach(function(color){
-					gradient.addColorStop.apply(gradient, color);
-				});
-
-				ctx.fillStyle = gradient;
+				ctx.fillStyle = createGradient(ctx, config.fill, glyphBound.bounds, glyphBound.x, glyphBound.y);
 			}
 
 			applyStyle(ctx, config);
@@ -243,7 +247,13 @@
 			if(config.fill){
 				ctx.fill();
 			}
-			if(config.lineStyle){
+			if(config.strokeStyle){
+				if(typeof config.strokeStyle === "string"){
+					ctx.strokeStyle = config.strokeStyle;
+				}else{
+					ctx.strokeStyle = createGradient(ctx, config.strokeStyle, glyphBound.bounds, glyphBound.x, glyphBound.y);
+				}
+				ctx.lineWidth = config.lineWidth;
 				ctx.stroke();
 			}
 		});

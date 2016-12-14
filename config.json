@@ -4,7 +4,7 @@
 		"lineCap": "could be round, butt or square",
 		"lineJoin": "could be round, bevel or mitter"
 	},
-	"size": 128,
+	"size": 98,
 	"glyphs": "abcdefg",
 	"font": "Roboto-Bold.ttf",
 	"name": "font",
@@ -31,11 +31,22 @@
 		"r1": 1,
 		"colors":[
 			[0.0, "red"],
-			[0.5, "green"],
 			[1.0, "blue"]
 		]
 	},
-	"lineStyle": "#00ff00",
+	"strokeStyle": {
+		"type": "linear",
+		"x0": 0,
+	   	"y0": 0,
+	   	"x1": 1,
+	   	"y1": 1,
+		"colors":[
+			[0.0, "rgba(128, 0, 0, 0)"],
+			[0.5, "green"],
+			[1.0, "yellow"]
+		]
+	},
+
 	"lineWidth": 5,
 
 	"lineCap": "round",
