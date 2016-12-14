@@ -1,6 +1,10 @@
 (function fontgen(){
-
+	var process = require("process");
 	var fs = require("fs");
+
+	var CANNOT_READ_CONFIG_FILE = 1;
+	var CANNOT_PARSE_CONFIG_FILE = 2;
+	var CANNOT_READ_FONT_FILE = 3;
 
 	function prop(name){
 		return function(o){
@@ -140,7 +144,7 @@
 				yoffset: Math.round(glyphBound.bounds.y),
 				width: Math.round(glyphBound.bounds.width),
 				height: Math.round(glyphBound.bounds.height),
-				xadvance: Math.round(((glyphBound.bounds.x + glyphBound.bounds.width - glyphBound.padding.right) / glyphBound.glyph.xMax) * glyphBound.glyph.advanceWidth),
+				xadvance: Math.round(((glyphBound.bounds.x + glyphBound.bounds.width - glyphBound.padding.right) / glyphBound.glyph.xMax) * glyphBound.glyph.advanceWidth) + config.letterSpacing,
 				page: 0,
 				chnl: 15
 			};
@@ -235,14 +239,14 @@
 		}catch(err){
 			if (err.code === "ENOENT") {
 				console.error(path + ' does not exist');
-				return;
+				require("process").exit(CANNOT_READ_FONT_FILE);
 			} else {
 				throw err;
 			}
 		}
 	}
 
-	function process(config){
+	function generate(config){
 		var font = config.font;
 		var chars = prepareChars(config.glyphs, config.uppercase);
 
@@ -263,6 +267,29 @@
 			var description = describeBounds(width, height, fontData, config, bounds);
 			saveFnt(description, config.out + ".fnt");
 		}
+	}
+
+	function parseConfig(config){
+		if(config){
+			var conf;
+			try{
+				conf = fs.readFileSync(config, "utf8");
+			}catch(err){
+				if (err.code === "ENOENT") {
+					console.error(config + ' does not exist');
+					process.exit(CANNOT_READ_CONFIG_FILE)
+				} else {
+					throw err;
+				}
+			}
+			try{
+				return  JSON.parse(conf);
+			}catch(err){
+				console.error( 'failed to parse', config );
+				process.exit(CANNOT_PARSE_CONFIG_FILE)
+			}
+		}
+		return {};
 	}
 
 	function main(){
@@ -286,12 +313,12 @@
 
 		var argv = require("yargs")
 			.usage("Usage: $0 [--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out out] [path_to_font]")
-			.example("$0 --chars 'abc' --uppercase font.ttf", "generate bitmap font for abcABC and store it to the font.png and font.fnt")
+			.example("$0 --glyphs 'abc' --uppercase font.ttf", "generate bitmap font for abcABC and store it to the font.png and font.fnt")
 			.boolean("uppercase")
 			.help('h')
 			.alias('h', 'help')
-			.alias("w", "width")
-			.alias("h", "height")
+			.alias("W", "width")
+			.alias("H", "height")
 			.alias("s", "size")
 			.alias("g", "glyphs")
 			.alias("c", "config")
@@ -310,27 +337,14 @@
 			}).argv;
 
 		Object.assign(config, argv);
-
-		if(argv.config){
-			try{
-				var conf = fs.readFileSync(argv.config, "utf8");
-				Object.assign(config, JSON.parse(conf));
-			}catch(err){
-				if (err.code === "ENOENT") {
-					console.error(argv.config + ' does not exist');
-					return;
-				} else {
-					throw err;
-				}
-			}
-		}
-
+		Object.assign(config, parseConfig(config.config));
 		Object.assign(config, argv);
+
 		if(argv._.length){
 			config.font = argv._[0];
 		}
 
-		process(config);
+		generate(config);
 	}
 	main();
 }());

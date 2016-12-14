@@ -17,7 +17,7 @@ Options:
                                                  UVWXYZ!№;?*()_=/|'@#^&{}[]\" "]
 
 Examples:
-  ../index.js --chars 'abc' --uppercase     generate bitmap font for abcABC and
+  ../index.js --glyphs 'abc' --uppercase    generate bitmap font for abcABC and
   font.ttf                                  store it to the font.png and
                                             font.fnt
 ```
