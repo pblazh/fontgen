@@ -1,4 +1,7 @@
 {
+	"glyphs": "abcdefg",
+	"font": "Roboto-Bold.ttf",
+	"name": "font",
 	"--fill": "#ff0000",
 	"-fill": {
 		"type": "linear",

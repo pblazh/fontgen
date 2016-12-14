@@ -128,7 +128,7 @@
 		return glyphBounds;
 	}
 
-	function describeBounds(width, height, fontData, name, style, bounds){
+	function describeBounds(width, height, fontData, config, bounds){
 		var data = bounds.map(function(glyphBound){
 			return {
 				//id: glyphBound.glyph.index,
@@ -150,11 +150,11 @@
 
 		return [
 			"<font>",
-			"    <info face='" + name + "' ",
+			"    <info face='" + config.name + "' ",
 			"          size='" + fontData.size + "' ",
 			"          bold='" + (fontData.bold ? "1" : "0") + "' ",
 			"          italic='" + (fontData.italic ? "1" : "0") + "' ",
-			"          padding='" + style.padding.top + "," + style.padding.right + "," + style.padding.bottom + "," + style.padding.left + "' ",
+			"          padding='" + config.padding.top + "," + config.padding.right + "," + config.padding.bottom + "," + config.padding.left + "' ",
 			"          charset='' unicode='' stretchH='100' smooth='1' aa='1' spacing='0,0' outline='0'/>",
 			"    <common lineHeight='95' ",
 			"            base='" + baseLine + "' ",
@@ -171,20 +171,20 @@
 		].join("\n");
 	}
 
-	function drawGlyphs(width, height, bounds, style){
+	function drawGlyphs(width, height, bounds, config){
 		var Canvas = require("canvas")
 		, canvas = new Canvas(width, height)
 		, ctx = canvas.getContext("2d");
 
-		ctx.shadowColor = style.shadowColor;
-		ctx.shadowBlur = style.shadowBlur;
-		ctx.shadowOffsetX = style.shadowOffsetX;
-		ctx.shadowOffsetY = style.shadowOffsetY;
+		ctx.shadowColor = config.shadowColor;
+		ctx.shadowBlur = config.shadowBlur;
+		ctx.shadowOffsetX = config.shadowOffsetX;
+		ctx.shadowOffsetY = config.shadowOffsetY;
 
 
 		bounds.forEach(function(glyphBound){
 			var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
-			Object.assign(path, style);
+			Object.assign(path, config);
 			path.draw(ctx);
 		});
 
@@ -195,22 +195,22 @@
 
 		bounds.forEach(function(glyphBound){
 			var path = glyphBound.glyph.getPath(glyphBound.x - glyphBound.bounds.x, glyphBound.y - glyphBound.bounds.y, glyphBound.size);
-			Object.assign(path, style);
+			Object.assign(path, config);
 
-			if(typeof style.fill === "string"){
+			if(typeof config.fill === "string"){
 				path.draw(ctx);
 			}else{
 				path.fill = null;
 				path.stroke = null;
 
 				var gradient;
-				if(style.fill.type === "linear"){
-					gradient = ctx.createLinearGradient(glyphBound.x + style.fill.x0, glyphBound.y + style.fill.y0, glyphBound.x + style.fill.x1, glyphBound.y + style.fill.y1);
-				}else if(style.fill.type === "radial"){
-					gradient = ctx.createRadialGradient(glyphBound.x + style.fill.x0, glyphBound.y + style.fill.y0, style.fill.r0, glyphBound.x + style.fill.x1, glyphBound.y + style.fill.y1, style.fill.r1 );
+				if(config.fill.type === "linear"){
+					gradient = ctx.createLinearGradient(glyphBound.x + config.fill.x0, glyphBound.y + config.fill.y0, glyphBound.x + config.fill.x1, glyphBound.y + config.fill.y1);
+				}else if(config.fill.type === "radial"){
+					gradient = ctx.createRadialGradient(glyphBound.x + config.fill.x0, glyphBound.y + config.fill.y0, config.fill.r0, glyphBound.x + config.fill.x1, glyphBound.y + config.fill.y1, config.fill.r1 );
 				}
 
-				style.fill.colors.forEach(function(color){
+				config.fill.colors.forEach(function(color){
 					gradient.addColorStop.apply(gradient, color);
 				});
 				ctx.fillStyle = gradient;
@@ -224,64 +224,58 @@
 
 	function getFontdata(path, chars){
 		var opentype = require("opentype.js");
-
-		var font = opentype.loadSync(path);
-		return {
-			fontFamily: font.names.fontFamily.en,
-			bold: /bold/i.test(font.names.fontSubfamily.en),
-			italic: /italic/i.test(font.names.fontSubfamily.en),
-			glyphs: font.stringToGlyphs(chars)
-		};
+		try{
+			var font = opentype.loadSync(path);
+			return {
+				fontFamily: font.names.fontFamily.en,
+				bold: /bold/i.test(font.names.fontSubfamily.en),
+				italic: /italic/i.test(font.names.fontSubfamily.en),
+				glyphs: font.stringToGlyphs(chars)
+			};
+		}catch(err){
+			if (err.code === "ENOENT") {
+				console.error(path + ' does not exist');
+				return;
+			} else {
+				throw err;
+			}
+		}
 	}
 
-	function process(argv, style){
-		var font = argv._[0];
-		var chars = prepareChars(argv.chars, argv.uppercase);
+	function process(config){
+		var font = config.font;
+		var chars = prepareChars(config.glyphs, config.uppercase);
 
-		var size = argv.size;
-		var width = argv.width;
-		var height = argv.height;
+		var size = config.size;
+		var width = config.width;
+		var height = config.height;
 
 		var fontData = getFontdata(font, chars);
-		fontData.size = size;
+		if(fontData){
+			fontData.size = size;
 
-		var bounds = getGlyphBounds(fontData.glyphs, size);
-		bounds = orderBounds(width, height, style.padding, bounds);
+			var bounds = getGlyphBounds(fontData.glyphs, size);
+			bounds = orderBounds(width, height, config.padding, bounds);
 
-		var canvas = drawGlyphs(width, height, bounds, style);
-		savePng(canvas, argv.out + ".png");
+			var canvas = drawGlyphs(width, height, bounds, config);
+			savePng(canvas, config.out + ".png");
 
-		var description = describeBounds(width, height, fontData, argv.name, style, bounds);
-		saveFnt(description, argv.out + ".fnt");
+			var description = describeBounds(width, height, fontData, config, bounds);
+			saveFnt(description, config.out + ".fnt");
+		}
 	}
 
 	function main(){
-		var CHARS = " $лвRCHF¥Kčkr€£nt₪₹Lzłleiบาท₤₺,.-1234567890+:∞%abcdfghjmopqsuvwxyABDEGIJMNOPQSTUVWXYZ!№;?*()_=/|'@#^&{}[]\" ";
-		var argv = require("yargs")
-			.usage("Usage: $0 [--chars chars] [--size size] [--width width] [--height height] [--name face] [--fill color] [--style style] [--out out] path_to_font")
-			.example("$0 --chars 'abc' --uppercase font.ttf", "generate bitmap font for abcABC and store it to the font.png and font.fnt")
-			.boolean("uppercase")
-			.alias("w", "width")
-			.alias("h", "height")
-			.alias("s", "size")
-			.alias("c", "chars")
-			.alias("u", "uppercase")
-			.alias("n", "name")
-			.alias("o", "out")
-			.alias("f", "fill")
-			.default({
-				out: "font",
-				name: "font",
-				size : 72,
-				width : 256,
-				height : 256,
-				uppercase : false,
-				chars : CHARS
-			})
-			.demand(1).argv;
-
-		var style = {
-			fill: argv.fill,
+		var GLYPHS = " $лвRCHF¥Kčkr€£nt₪₹Lzłleiบาท₤₺,.-1234567890+:∞%abcdfghjmopqsuvwxyABDEGIJMNOPQSTUVWXYZ!№;?*()_=/|'@#^&{}[]\" ";
+		var config = {
+			out: "font",
+			name: "font",
+			size : 72,
+			width : 256,
+			height : 256,
+			uppercase : false,
+			glyphs : GLYPHS,
+			fill: "black",
 			padding : {
 				top: 0,
 				right: 0,
@@ -290,13 +284,53 @@
 			}
 		};
 
-		if(argv.style){
-			var css = fs.readFileSync(argv.style, "utf8");
-			Object.assign(style, JSON.parse(css));
-		}
-		style.fill = argv.fill ? argv.fill : style.fill;
+		var argv = require("yargs")
+			.usage("Usage: $0 [--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out out] [path_to_font]")
+			.example("$0 --chars 'abc' --uppercase font.ttf", "generate bitmap font for abcABC and store it to the font.png and font.fnt")
+			.boolean("uppercase")
+			.help('h')
+			.alias('h', 'help')
+			.alias("w", "width")
+			.alias("h", "height")
+			.alias("s", "size")
+			.alias("g", "glyphs")
+			.alias("c", "config")
+			.alias("u", "uppercase")
+			.alias("n", "name")
+			.alias("o", "out")
+			.alias("f", "fill")
+			.default({
+				out: config.out,
+				name: config.name,
+				size : config.size,
+				width : config.width,
+				height : config.height,
+				uppercase : config.uppercase,
+				glyphs : GLYPHS
+			}).argv;
 
-		process(argv, style);
+		Object.assign(config, argv);
+
+		if(argv.config){
+			try{
+				var conf = fs.readFileSync(argv.config, "utf8");
+				Object.assign(config, JSON.parse(conf));
+			}catch(err){
+				if (err.code === "ENOENT") {
+					console.error(argv.config + ' does not exist');
+					return;
+				} else {
+					throw err;
+				}
+			}
+		}
+
+		Object.assign(config, argv);
+		if(argv._.length){
+			config.font = argv._[0];
+		}
+
+		process(config);
 	}
 	main();
 }());
