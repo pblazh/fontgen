@@ -3,6 +3,7 @@
 
 	var process = require("process");
 	var fs = require("fs");
+	var Canvas = require("canvas");
 
 	var CANNOT_READ_CONFIG_FILE = 1;
 	var CANNOT_PARSE_CONFIG_FILE = 2;
@@ -66,6 +67,13 @@
 			}
 		});
 	}
+
+	function loadImage(path){
+		var imageData = fs.readFileSync(path);
+		var img = new Canvas.Image();
+		img.src = imageData;
+		return img;
+	};
 
 	function getBounds(path){
 		var xs = path.commands
@@ -204,8 +212,7 @@
 	}
 
 	function drawGlyphs(width, height, bounds, config){
-		var Canvas = require("canvas")
-		, canvas = new Canvas(width, height)
+		var canvas = new Canvas(width, height)
 		, ctx = canvas.getContext("2d");
 
 		ctx.shadowColor = config.shadowColor;
@@ -244,7 +251,11 @@
 
 			applyStyle(ctx, config);
 			path.draw(ctx);
-			if(config.fill){
+			if(config.pattern){
+				var ptrn = ctx.createPattern(loadImage(config.pattern), 'repeat');
+				ctx.fillStyle = ptrn;
+			}
+			if(config.fill || config.pattern){
 				ctx.fill();
 			}
 			if(config.strokeStyle){
@@ -252,7 +263,6 @@
 					ctx.strokeStyle = config.strokeStyle;
 				}else{
 					ctx.strokeStyle = createGradient(ctx, config.strokeStyle, glyphBound.bounds, glyphBound.x, glyphBound.y);
-					console.log( ctx.strokeStyle);
 				}
 				ctx.lineWidth = config.lineWidth;
 				ctx.stroke();
