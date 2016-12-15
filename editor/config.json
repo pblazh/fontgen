@@ -4,6 +4,8 @@
 		"lineCap": "could be round, butt or square",
 		"lineJoin": "could be round, bevel or mitter"
 	},
+	"width": 255,
+	"height": 255,
 	"size": 98,
 	"glyphs": "abcdefg",
 	"font": "Roboto-Bold.ttf",

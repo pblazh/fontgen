@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>fontgen</title>
+		<script src="../node_modules/pixi.js/dist/pixi.js"></script>
+		<script src="BitmapFont.js"></script>
+    </head>
+    <body>
+		<canvas id="canvas" width=256 height=256> </canvas>
+		<div>
+			<label for="load">load config<label>
+			<input id="load" type=file value="load"/>
+			<textarea id="stdin" style="display: block; width: 255px; height: 255px;"> </textarea>
+			<textarea id="stdout" style="display: block; width: 255px; height: 255px;"> </textarea>
+			<button id="apply">apply</button>
+		</div>
+		<script src="./editor.js"></script>
+    </body>
+</html>
+
