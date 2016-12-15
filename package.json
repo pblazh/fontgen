@@ -2,15 +2,20 @@
   "name": "fontgen",
   "version": "1.0.0",
   "description": "generate bitmap font from a ttf",
-  "main": "index.js",
+  "main": "fontgen.js",
   "dependencies": {
     "canvas": "^1.6.2",
     "opentype.js": "^0.6.6",
     "yargs": "^6.5.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "browserify": "^13.1.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "fontgen": "index.js"
   },
   "repository": {
     "type": "git",
