@@ -13,6 +13,10 @@ module.exports = function fontgen(loadImage){
 		};
 	}
 
+	function id(o){
+		return o;
+	}
+
 	function has(name){
 		return function(o){
 			return o.hasOwnProperty(name);
@@ -35,6 +39,34 @@ module.exports = function fontgen(loadImage){
 			out += prop + "='" + data[prop] + "' ";
 		}
 		return out;
+	}
+
+	function madePairs(characters){
+		var pairs = [];
+		for(var i = 0, l = characters.length; i < l; i++){
+			var p = characters.slice(i + 1).concat(characters.slice(0, i));
+			pairs = pairs.concat(p.map(function(char){
+				return [characters[i], char];
+			}));
+		}
+		return pairs;
+	}
+
+	function getKerning(font, bounds){
+		var pairs = madePairs(bounds);
+		var kernings = pairs.map(function(pair){
+			var kerning = font.getKerningValue(pair[0].glyph.index, pair[1].glyph.index);
+			return kerning
+				? "        <kerning first='" + pair[0].glyph.unicode + "' second='" + pair[1].glyph.unicode + "' amount='" + kerning + "'/>"
+				: null;
+		}).filter(id);
+
+		return [
+			"    <kernings count='" + kernings.length + "'>",
+					kernings.join("\n"),
+			"    </kernings>"
+		].join("\n");
+
 	}
 
 	function getBounds(path){
@@ -145,6 +177,7 @@ module.exports = function fontgen(loadImage){
 			"    <chars count='" + bounds.length + "'>",
 					data.map(function(dataEntry){ return "        <char " + dump(dataEntry) + "/>"; }).join("\n"),
 			"    </chars>",
+					getKerning(fontData.font, bounds),
 			"</font>"
 		].join("\n");
 	}
@@ -249,6 +282,7 @@ module.exports = function fontgen(loadImage){
 				throw err;
 			}
 			done({
+				font: font,
 				fontFamily: font.names.fontFamily.en,
 				bold: /bold/i.test(font.names.fontSubfamily.en),
 				italic: /italic/i.test(font.names.fontSubfamily.en),
