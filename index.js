@@ -8,6 +8,7 @@
 	var CANNOT_READ_CONFIG_FILE = 1;
 	var CANNOT_PARSE_CONFIG_FILE = 2;
 	var CANNOT_READ_FONT_FILE = 3;
+	var CANNOT_FIT_BOUNDS = 4;
 
 	function prop(name){
 		return function(o){
@@ -134,6 +135,9 @@
 				glyphBound.y = y;
 				x += glyphBound.bounds.width + margin * 2;
 				lineHeight = Math.max(lineHeight, glyphBound.bounds.height + margin * 2);
+			}
+			if((glyphBound.x + glyphBound.bounds.width > width ) || (glyphBound.y + glyphBound.bounds.height > height )){
+				exit(CANNOT_FIT_BOUNDS);
 			}
 			return glyphBound;
 		});
@@ -294,8 +298,7 @@
 			};
 		}catch(err){
 			if (err.code === "ENOENT") {
-				console.error(path + ' does not exist');
-				require("process").exit(CANNOT_READ_FONT_FILE);
+				exit(CANNOT_READ_FONT_FILE);
 			} else {
 				throw err;
 			}
@@ -316,6 +319,7 @@
 
 			var bounds = getGlyphBounds(fontData.glyphs, size);
 			bounds = orderBounds(width, height, config.padding, bounds);
+			var lastBound = bounds[bounds.length - 1];
 
 			var canvas = drawGlyphs(width, height, bounds, config);
 			savePng(canvas, config.out + ".png");
@@ -332,8 +336,7 @@
 				conf = fs.readFileSync(config, "utf8");
 			}catch(err){
 				if (err.code === "ENOENT") {
-					console.error(config + ' does not exist');
-					process.exit(CANNOT_READ_CONFIG_FILE)
+					exit(CANNOT_READ_CONFIG_FILE)
 				} else {
 					throw err;
 				}
@@ -341,11 +344,24 @@
 			try{
 				return  JSON.parse(conf);
 			}catch(err){
-				console.error( 'failed to parse', config );
-				process.exit(CANNOT_PARSE_CONFIG_FILE)
+				exit(CANNOT_PARSE_CONFIG_FILE)
 			}
 		}
 		return {};
+	}
+	function exit(reason){
+		switch(reason){
+			case CANNOT_READ_CONFIG_FILE:
+				console.error('config does not exist');
+				break;
+			case CANNOT_READ_FONT_FILE:
+				console.error('font does not exist');
+				break;
+			case CANNOT_FIT_BOUNDS:
+				console.error('can not fit all glyphs');
+				break;
+		}
+		process.exit(0);
 	}
 
 	function main(){
@@ -390,20 +406,12 @@
 			.alias("n", "name")
 			.alias("o", "out")
 			.alias("f", "fill")
-			.default({
-				out: config.out,
-				name: config.name,
-				size : config.size,
-				width : config.width,
-				height : config.height,
-				uppercase : config.uppercase,
-				glyphs : GLYPHS
-			}).argv;
+			.argv;
 
 
 		Object.assign(config, argv);
 		Object.assign(config, parseConfig(config.config));
-		//Object.assign(config, argv);
+		Object.assign(config, argv);
 
 		if(argv._.length){
 			config.font = argv._[0];
@@ -411,7 +419,8 @@
 
 		if(argv.dump){
 			console.log(JSON.stringify(config));
-			process.exit(0);
+			exit(0);
+			return;
 		}
 
 		generate(config);
