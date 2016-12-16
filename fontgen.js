@@ -52,10 +52,15 @@ module.exports = function fontgen(loadImage){
 		return pairs;
 	}
 
-	function getKerning(font, bounds){
+	function round(number){
+		return Math.round(number);
+	}
+
+	function getKerning(font, bounds, size){
+		var scale = getFontScale(font, size);
 		var pairs = madePairs(bounds);
 		var kernings = pairs.map(function(pair){
-			var kerning = font.getKerningValue(pair[0].glyph.index, pair[1].glyph.index);
+			var kerning = round(scale * font.getKerningValue(pair[0].glyph.index, pair[1].glyph.index));
 			return kerning
 				? "        <kerning first='" + pair[0].glyph.unicode + "' second='" + pair[1].glyph.unicode + "' amount='" + kerning + "'/>"
 				: null;
@@ -139,24 +144,29 @@ module.exports = function fontgen(loadImage){
 		return glyphBounds;
 	}
 
+	function getFontScale(font, size){
+		return size / (Math.abs(font.ascender) + Math.abs(font.descender));
+	}
+
 	function describeBounds(width, height, fontData, config, bounds){
+		var scale = getFontScale(fontData.font, config.size);
 		var data = bounds.map(function(glyphBound){
 			return {
 				id: glyphBound.glyph.unicode,
 				letter: glyphBound.glyph.name,
-				x: Math.round(glyphBound.x),
-				y: Math.round(glyphBound.y),
-				xoffset: Math.round(glyphBound.bounds.x),
-				yoffset: Math.round(glyphBound.bounds.y),
-				width: Math.round(glyphBound.bounds.width),
-				height: Math.round(glyphBound.bounds.height),
-				xadvance: Math.round(((glyphBound.bounds.x + glyphBound.bounds.width - glyphBound.padding.right) / glyphBound.glyph.xMax) * glyphBound.glyph.advanceWidth) + config.letterSpacing,
+				x: round(glyphBound.x),
+				y: round(glyphBound.y),
+				xoffset: round(glyphBound.bounds.x),
+				yoffset: round(glyphBound.bounds.y),
+				width: round(glyphBound.bounds.width),
+				height: round(glyphBound.bounds.height),
+				xadvance: round(scale * glyphBound.glyph.advanceWidth + glyphBound.padding.right + config.letterSpacing),
 				page: 0,
 				chnl: 15
 			};
 		});
 
-		var baseLine = -Math.round(bounds.map(prop("bounds.y")).sort(compareNumbers).shift());
+		var baseLine = -round(bounds.map(prop("bounds.y")).sort(compareNumbers).shift());
 
 		return [
 			"<font>",
@@ -177,7 +187,7 @@ module.exports = function fontgen(loadImage){
 			"    <chars count='" + bounds.length + "'>",
 					data.map(function(dataEntry){ return "        <char " + dump(dataEntry) + "/>"; }).join("\n"),
 			"    </chars>",
-					getKerning(fontData.font, bounds),
+					getKerning(fontData.font, bounds, fontData.size),
 			"</font>"
 		].join("\n");
 	}
