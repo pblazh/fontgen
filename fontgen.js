@@ -33,12 +33,8 @@ module.exports = function fontgen(loadImage){
 		return a - b;
 	}
 
-	function dump(data){
-		var out = "";
-		for (var prop in data){
-			out += prop + "='" + data[prop] + "' ";
-		}
-		return out;
+	function round(number){
+		return Math.round(number);
 	}
 
 	function madePairs(characters){
@@ -50,10 +46,6 @@ module.exports = function fontgen(loadImage){
 			}));
 		}
 		return pairs;
-	}
-
-	function round(number){
-		return Math.round(number);
 	}
 
 	function getKerning(font, bounds, size){
@@ -74,7 +66,7 @@ module.exports = function fontgen(loadImage){
 
 	}
 
-	function getBounds(path){
+	function getPathBounds(path){
 		var xs = path.commands
 			.filter(has("x"))
 			.map(prop("x"))
@@ -100,12 +92,12 @@ module.exports = function fontgen(loadImage){
 			return{
 				glyph: glyph,
 				size: size,
-				bounds: getBounds(glyph.getPath(0, 0, size ))
+				bounds: getPathBounds(glyph.getPath(0, 0, size ))
 			};
 		});
 	}
 
-	function orderBounds(width, height, padding, glyphBounds){
+	function orderGlyphBounds(width, height, padding, glyphBounds){
 		var x = 0;
 		var y = 0;
 		var lineHeight = 0;
@@ -148,6 +140,14 @@ module.exports = function fontgen(loadImage){
 		return size / (Math.abs(font.ascender) + Math.abs(font.descender));
 	}
 
+	function toParamsString(data){
+		var out = "";
+		for (var prop in data){
+			out += prop + "='" + data[prop] + "' ";
+		}
+		return out;
+	}
+
 	function describeBounds(width, height, fontData, config, bounds){
 		var scale = getFontScale(fontData.font, config.size);
 		var data = bounds.map(function(glyphBound){
@@ -185,7 +185,7 @@ module.exports = function fontgen(loadImage){
 			"        <page id='0' file='font.png'/>",
 			"    </pages>",
 			"    <chars count='" + bounds.length + "'>",
-					data.map(function(dataEntry){ return "        <char " + dump(dataEntry) + "/>"; }).join("\n"),
+					data.map(function(dataEntry){ return "        <char " + toParamsString(dataEntry) + "/>"; }).join("\n"),
 			"    </chars>",
 					getKerning(fontData.font, bounds, fontData.size),
 			"</font>"
@@ -250,17 +250,16 @@ module.exports = function fontgen(loadImage){
 			path.fill = null;
 			path.stroke = null;
 
-			if(typeof config.fill === "string"){
-				applyStyle(ctx, config);
-			}else{
+			applyCanvasStyle(ctx, config);
+			if(typeof config.fill === "object"){
 				ctx.fillStyle = createGradient(ctx, config.fill, glyphBound.bounds, glyphBound.x, glyphBound.y);
 			}
 
-			applyStyle(ctx, config);
-			path.draw(ctx);
 			if(pattern){
 				ctx.fillStyle = ctx.createPattern(pattern, 'repeat');
 			}
+
+			path.draw(ctx);
 			if(config.fill || config.pattern){
 				ctx.fill();
 			}
@@ -276,7 +275,7 @@ module.exports = function fontgen(loadImage){
 		});
 	}
 
-	function applyStyle(ctx, style){
+	function applyCanvasStyle(ctx, style){
 		["lineStyle", "lineWidth", "lineCap", "lineJoin"].forEach(function(property){
 			ctx[property] = style[property] ? style[property] : null;
 		});
@@ -306,7 +305,7 @@ module.exports = function fontgen(loadImage){
 			fontData.size = config.size;
 
 			var bounds = getGlyphBounds(fontData.glyphs, config.size);
-			bounds = orderBounds(config.width, config.height, config.padding, bounds);
+			bounds = orderGlyphBounds(config.width, config.height, config.padding, bounds);
 
 			var description = describeBounds(config.width, config.height, fontData, config, bounds);
 
@@ -314,7 +313,7 @@ module.exports = function fontgen(loadImage){
 				loadImage(config.pattern, function(image){
 					drawGlyphs(canvas, config.width, config.height, bounds, config, image);
 					done(description);
-				})
+			})
 			}else{
 				drawGlyphs(canvas, config.width, config.height, bounds, config);
 				done(description);
