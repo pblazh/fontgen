@@ -251,11 +251,12 @@ module.exports = function fontgen(loadImage){
 			path.stroke = null;
 
 			applyCanvasStyle(ctx, config);
+
 			if(typeof config.fill === "object"){
 				ctx.fillStyle = createGradient(ctx, config.fill, glyphBound.bounds, glyphBound.x, glyphBound.y);
-			}
-
-			if(pattern){
+			}else if(typeof config.fill === "string"){
+				ctx.fillStyle = config.fill;
+			}else if(pattern){
 				ctx.fillStyle = ctx.createPattern(pattern, 'repeat');
 			}
 
