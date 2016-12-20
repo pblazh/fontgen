@@ -1,6 +1,6 @@
 {
   "name": "fontgen",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "generate bitmap font from a *.ttf or *.otf file",
   "main": "fontgen.js",
   "dependencies": {
