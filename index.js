@@ -41,8 +41,8 @@
 		var canvas = new Canvas(config.width, config.height);
 		try{
 			generate(canvas, config, function(fnt){
-				savePng(canvas, config.out + ".png");
-				saveFnt(fnt, config.out + ".fnt");
+				savePng(canvas, config.png);
+				saveFnt(fnt, config.fnt);
 			});
 		}catch(err){
 			console.log( err);
@@ -88,7 +88,8 @@
 	var GLYPHS = " $лвRCHF¥Kčkr€£nt₪₹Lzłleiบาท₤₺,.-1234567890+:∞%abcdfghjmopqsuvwxyABDEGIJMNOPQSTUVWXYZ!№;?*()_=/|'@#^&{}[]\" ";
 	var config = {
 		glyphs : GLYPHS,
-		out: "font",
+		png: "font.png",
+		fnt: "font.fnt",
 		name: "font",
 		size : 72,
 		width : 256,
@@ -113,7 +114,7 @@
 	};
 
 	var argv = require("yargs")
-		.usage("Usage: $0 [--dump ][--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out out] [path_to_font]")
+		.usage("Usage: $0 [--dump ][--glyphs glyphs] [--size size] [--width width] [--height height] [--name face] [--fill color] [--config config] [--out-fnt fnt] [--out-png png] [path_to_font]")
 		.example("$0 --glyphs 'abc' font.ttf", "generate bitmap font for abc and store it to the font.png and font.fnt")
 		.boolean("dump")
 		.help('h')
@@ -124,7 +125,6 @@
 		.alias("g", "glyphs")
 		.alias("c", "config")
 		.alias("n", "name")
-		.alias("o", "out")
 		.alias("f", "fill")
 		.argv;
 
