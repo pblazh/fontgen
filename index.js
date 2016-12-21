@@ -89,6 +89,7 @@
 	var config = {
 		glyphs : GLYPHS,
 		png: "font.png",
+		texture: "font.png",
 		fnt: "font.fnt",
 		name: "font",
 		size : 72,

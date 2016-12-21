@@ -182,7 +182,7 @@ module.exports = function fontgen(loadImage){
 			"            lineHeight='" + (config.size + config.lineSpacing) + "' ",
 			"            pages='1' packed='0'/>",
 			"    <pages>",
-			"        <page id='0' file='font.png'/>",
+			"        <page id='0' file='" + config.texture + "'/>",
 			"    </pages>",
 			"    <chars count='" + bounds.length + "'>",
 					data.map(function(dataEntry){ return "        <char " + toParamsString(dataEntry) + "/>"; }).join("\n"),
